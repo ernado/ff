@@ -127,7 +127,7 @@ func (i *Instance) Run(ctx context.Context, opt RunOptions) error {
 	if opt.Probe == nil {
 		probe, err := i.Probe(ctx, opt.Input)
 		if err != nil {
-			return fmt.Errorf("probe: %w", err)
+			return errors.Wrap(err, "probe")
 		}
 		opt.Probe = probe
 	}
@@ -136,7 +136,7 @@ func (i *Instance) Run(ctx context.Context, opt RunOptions) error {
 	}
 	summary, err := ffprobe.ParseSummary(opt.Probe)
 	if err != nil {
-		return fmt.Errorf("summary: %w", err)
+		return errors.Wrap(err, "summary")
 	}
 	pr, pw := io.Pipe()
 	progress := newProgressReader(pr, func(p *ffmpeg.Progress) {
@@ -357,7 +357,7 @@ func New(opt Options) *Instance {
 	i := &Instance{
 		binary:      opt.Binary,
 		binaryProbe: opt.BinaryProbe,
-		trace:       opt.TracerProvider.Tracer("ffrun"),
+		trace:       opt.TracerProvider.Tracer("github.com/ernado/ff/ffrun"),
 	}
 
 	return i
