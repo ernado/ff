@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -137,24 +138,23 @@ func (i *Instance) Run(ctx context.Context, opt RunOptions) error {
 	if err != nil {
 		return fmt.Errorf("summary: %w", err)
 	}
-	progress, err := NewProgressListener(func(p *ffmpeg.Progress) {
-		if opt.Progress == nil || summary.Duration == 0 {
+	pr, pw := io.Pipe()
+	progress := newProgressReader(pr, func(p *ffmpeg.Progress) {
+		if opt.Progress == nil {
 			return
 		}
 		var progress Progress
 		progress.Complete = p.OutTime.Seconds() / summary.Duration.Seconds()
-		progress.Speed = p.Speed
 		opt.Progress(progress)
 	})
-	if err != nil {
-		return fmt.Errorf("failed to setup progress lisneter: %w", err)
-	}
 
 	args := []string{
 		fHideBanner, fOverwrite,
 		fVerbose, verboseError,
+		fXError,
+		fNoStdin,
 
-		fProgress, progress.Addr(),
+		fProgress, "pipe:1",
 		fStatsPeriod, strconv.FormatFloat(opt.ProgressPeriod.Seconds(), 'f', -1, 64),
 	}
 
@@ -191,10 +191,17 @@ func (i *Instance) Run(ctx context.Context, opt RunOptions) error {
 		limit: 10,
 	}
 	cmd.Stderr = logs
+	cmd.Stdout = pw
 
 	g, ctx := errgroup.WithContext(ctx)
 	g.Go(func() error {
-		return progress.Run()
+		if err := progress.Run(); err != nil {
+			if errors.Is(err, io.ErrClosedPipe) {
+				return nil
+			}
+			return errors.Wrap(err, "progress.Run")
+		}
+		return nil
 	})
 
 	done := make(chan struct{})
@@ -203,7 +210,7 @@ func (i *Instance) Run(ctx context.Context, opt RunOptions) error {
 		case <-done:
 		case <-ctx.Done():
 		}
-		return progress.Stop()
+		return pr.Close()
 	})
 	g.Go(func() error {
 		defer close(done)
@@ -239,6 +246,7 @@ const (
 	fStatsPeriod = "-stats_period"
 	fSeekable    = "-seekable"
 	fXError      = "-xerror"
+	fNoStdin     = "-nostdin"
 
 	fProbePrintFormat = "-print_format"
 	fProbeShowFormat  = "-show_format"
