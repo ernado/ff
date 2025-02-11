@@ -1,3 +1,4 @@
+// Package ffrun provides a wrapper to run ffmpeg.
 package ffrun
 
 import (
@@ -186,7 +187,7 @@ func (i *Instance) Run(ctx context.Context, opt RunOptions) error {
 		attribute.String("output", opt.Output),
 		attribute.StringSlice("args", args),
 	)
-	cmd := exec.CommandContext(ctx, i.binary, args...)
+	cmd := exec.CommandContext(ctx, i.binary, args...) // #nosec: G204
 	logs := &logBuffer{
 		limit: 10,
 	}
@@ -292,7 +293,7 @@ func (i *Instance) Probe(ctx context.Context, filePath string) (*ffmpeg.Probe, e
 		attribute.String("file.path", filePath),
 		attribute.StringSlice("args", args),
 	)
-	cmd := exec.CommandContext(ctx, i.binaryProbe, args...)
+	cmd := exec.CommandContext(ctx, i.binaryProbe, args...) // #nosec: G204
 
 	probeRaw := new(bytes.Buffer)
 	cmd.Stdout = probeRaw
