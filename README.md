@@ -5,6 +5,9 @@ Helpers for running ffmpeg commands in Go.
 
 ## Example
 
+You need ffmpeg in PATH to use this package.
+Alternatively, you can provide path to binary in `ffrun.Options`.
+
 ```go
 package main
 
