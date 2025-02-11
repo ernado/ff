@@ -1,0 +1,35 @@
+name: e2e
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: false
+      - name: Get Go environment
+        id: go-env
+        run: |
+          echo "cache=$(go env GOCACHE)" >> $GITHUB_ENV
+          echo "modcache=$(go env GOMODCACHE)" >> $GITHUB_ENV
+
+      - name: Set up cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.cache }}
+            ${{ env.modcache }}
+          key: e2e-${{ runner.os }}-${{ runner.arch }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            e2e-${{ runner.os }}-${{ runner.arch }}-go-
+
+      - name: Checkout code
+        uses: actions/checkout@v4

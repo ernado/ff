@@ -1,0 +1,68 @@
+name: cover
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: false
+
+      - name: Get Go environment
+        id: go-env
+        run: |
+          echo "cache=$(go env GOCACHE)" >> $GITHUB_ENV
+          echo "modcache=$(go env GOMODCACHE)" >> $GITHUB_ENV
+
+      - name: Set up cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.cache }}
+            ${{ env.modcache }}
+          key: coverage-${{ runner.os }}-${{ runner.arch }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            coverage-${{ runner.os }}-${{ runner.arch }}-go-
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run tests with coverage
+        run: make coverage
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: profile.out
+          if-no-files-found: error
+          retention-days: 1
+
+  send:
+    runs-on: ubuntu-latest
+    needs:
+      - run
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage
+
+      - name: Send coverage
+        uses: codecov/codecov-action@v5
+        with:
+          files: profile.out
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
+
