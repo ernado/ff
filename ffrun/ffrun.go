@@ -159,11 +159,6 @@ func (i *Instance) Run(ctx context.Context, opt RunOptions) error {
 		fStatsPeriod, strconv.FormatFloat(opt.ProgressPeriod.Seconds(), 'f', -1, 64),
 	}
 
-	// Set seekable only on http input.
-	if strings.HasPrefix(opt.Input, prefixHTTP) {
-		args = append(args, fSeekable, "1")
-	}
-
 	// Some arguments should be set before input file.
 	if len(opt.InputArgs) > 0 {
 		args = append(args, opt.InputArgs...)
