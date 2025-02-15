@@ -152,7 +152,6 @@ func (i *Instance) Run(ctx context.Context, opt RunOptions) error {
 	args := []string{
 		fHideBanner, fOverwrite,
 		fVerbose, verboseError,
-		fXError,
 		fNoStdin,
 
 		fProgress, "pipe:1",
