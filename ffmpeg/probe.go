@@ -71,4 +71,7 @@ type ProbeTags struct {
 type Probe struct {
 	Streams []ProbeStream `json:"streams"`
 	Format  ProbeFormat   `json:"format"`
+
+	// Raw value returned by ffmpeg.
+	Raw []byte `json:"-"`
 }

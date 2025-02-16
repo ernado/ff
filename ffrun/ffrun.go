@@ -305,6 +305,7 @@ func (i *Instance) Probe(ctx context.Context, filePath string) (*ffmpeg.Probe, e
 	}
 
 	var probe ffmpeg.Probe
+	probe.Raw = probeRaw.Bytes()
 	if err := json.NewDecoder(probeRaw).Decode(&probe); err != nil {
 		return nil, errors.Wrap(err, "decode")
 	}
