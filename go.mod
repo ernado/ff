@@ -5,7 +5,7 @@ go 1.23.5
 require (
 	github.com/go-faster/errors v0.7.1
 	github.com/go-faster/sdk v0.28.0
-	github.com/stretchr/testify v1.10.0
+	github.com/stretchr/testify v1.11.0
 	go.opentelemetry.io/otel v1.37.0
 	go.opentelemetry.io/otel/trace v1.37.0
 	go.uber.org/zap v1.27.0
