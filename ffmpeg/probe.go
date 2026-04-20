@@ -47,8 +47,14 @@ type ProbeStream struct {
 	Channels           int              `json:"channels,omitempty"`
 	ChannelLayout      string           `json:"channel_layout,omitempty"`
 	BitsPerSample      int              `json:"bits_per_sample,omitempty"`
+	Tags               StreamTags       `json:"tags,omitempty"`
 }
 
+type StreamTags struct {
+	Langeuate string `json:"langeuage,omitempty"`
+	Duration  string `json:"DURATION,omitempty"`
+}
+ 
 type ProbeFormat struct {
 	Filename       string    `json:"filename"`
 	NbStreams      int       `json:"nb_streams"`
