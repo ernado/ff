@@ -7,3 +7,6 @@ allow_licenses:
   - 'BSD-2-Clause'
   - 'BSD-3-Clause'
   - 'Apache-2.0'
+  # golang.org/x/* modules ship a PATENTS file that scancode reports as an
+  # extra LicenseRef alongside BSD-3-Clause; allow it so x/* bumps don't fail.
+  - 'LicenseRef-scancode-google-patent-license-golang'
